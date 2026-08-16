@@ -18,7 +18,7 @@ from datetime import datetime
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "submissions.db")
 
 # 管理员密码(部署到公网时请改成你自己的密码,不要用默认值)
-ADMIN_PASSWORD = "gpa2026"
+ADMIN_PASSWORD = "ymyc2026"
 
 
 def _get_conn():
