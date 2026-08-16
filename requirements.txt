@@ -1,0 +1,7 @@
+# 项目依赖的第三方库
+# 安装方法:在终端执行  pip install -r requirements.txt
+pandas>=2.0
+openpyxl>=3.1
+matplotlib>=3.7
+rich>=13.0
+streamlit>=1.30

@@ -1,0 +1,20 @@
+# Python 运行时产生的缓存文件,不需要上传到 GitHub
+__pycache__/
+*.pyc
+
+# 虚拟环境
+venv/
+.venv/
+
+# 生成的图表和报告(每次运行会重新生成)
+output/
+
+# Web 应用的测试数据(SQLite 数据库,包含真实成绩隐私)
+data/
+
+# 个人真实成绩单(示例文件除外,保护隐私)
+*.xlsx
+!sample/*.xlsx
+
+# VS Code 个人配置
+.vscode/

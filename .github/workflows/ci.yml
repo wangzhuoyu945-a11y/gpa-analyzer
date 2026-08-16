@@ -1,0 +1,44 @@
+# GitHub Actions 持续集成(CI)
+# 每次推送代码到 GitHub,会自动在一台云端 Linux 虚拟机上:
+#   1. 安装依赖
+#   2. 用示例数据跑一遍程序(默认规则 + 各学校规则)
+# 任何一步失败,仓库首页会显示红叉;全部通过显示绿勾。
+# 这样别人(和面试官)能一眼看到:这个项目的代码是真实可运行的。
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 安装依赖
+        run: pip install -r requirements.txt
+
+      - name: 测试运行(默认规则)
+        run: python main.py --no-chart
+
+      - name: 测试运行(各学校规则预设)
+        run: |
+          python main.py --school "标准4.0制(细分)" --no-chart
+          python main.py --school "简洁4.0制" --no-chart
+          python main.py --school "标准5.0制" --no-chart
+          python main.py --config "configs/我的学校(模板).json" --no-chart
+
+      - name: 测试规则列表与帮助
+        run: |
+          python main.py --list-schools
+          python main.py --help
