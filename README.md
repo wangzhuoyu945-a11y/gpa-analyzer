@@ -18,7 +18,7 @@
 
 ### 方式一:Web 在线版(推荐,无需安装)
 
-👉 [在线体验](你的Streamlit链接) *(部署后填入链接)*
+👉 **[在线体验](https://gpa-analyzer-np8csp8jcxmompy2aygep9.streamlit.app/)**
 
 直接打开链接,选择绩点规则 → 上传成绩单或手动输入 → 查看 GPA → 对比学校给出的绩点。
 
