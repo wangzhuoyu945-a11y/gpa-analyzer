@@ -89,7 +89,9 @@ if page == "🏠 计算GPA":
     if selected_idx == 0:
         ruleset = DEFAULT_RULESET
     else:
-        ruleset = find_school(schools[selected_idx])
+        # 注意用 school_names(含"内置默认"占位项)取名称,而不是 schools 列表,
+        # 否则下标会错位一位
+        ruleset = find_school(school_names[selected_idx])
 
     # ---- 数据输入方式 ----
     input_mode = st.radio("数据输入方式", ["📤 上传成绩单 CSV", "✍️ 手动输入课程"], horizontal=True)
