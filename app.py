@@ -45,7 +45,7 @@ from analyzer import analyze_by_semester, credit_distribution
 st.sidebar.title("📊 GPA 分析器")
 page = st.sidebar.radio(
     "选择功能",
-    ["🏠 计算GPA", "📊 管理面板"],
+    ["🏠 计算GPA", "🤖 AI助手", "📊 管理面板"],
     horizontal=True,
 )
 
@@ -286,7 +286,107 @@ if page == "🏠 计算GPA":
 
 
 # ============================================================
-# 页面 2: 管理面板 (你用的,查看所有提交数据)
+# 页面 2: AI 助手 (聊天问答)
+# ============================================================
+if page == "🤖 AI助手":
+
+    from ai_assistant import get_api_key, chat_completion, build_system_prompt, MODEL
+
+    st.title("🤖 AI 绩点助手")
+    st.markdown(
+        "可以问我任何绩点相关的问题，比如：**“哪门课拖了我的GPA”**、"
+        "**“大二要考多少分才能把GPA刷到3.8”**、**“什么叫加权平均分”**。"
+        "如果你刚在「计算GPA」页面算过，我会自动看到你的成绩数据，回答更有针对性。"
+    )
+
+    # ---- 获取 API Key: Secrets > 环境变量 > 临时输入 ----
+    api_key = get_api_key(st.secrets)
+
+    if not api_key:
+        temp_key = st.text_input(
+            "临时输入 API Key（仅本次会话有效，不会保存）",
+            type="password",
+            placeholder="粘贴智谱 AI 的 API Key",
+        )
+        if temp_key.strip():
+            st.session_state["temp_api_key"] = temp_key.strip()
+            st.rerun()
+        api_key = st.session_state.get("temp_api_key")
+
+    if not api_key:
+        st.warning(
+            "⚠️ 还没有配置 AI API Key。**开发者**请按以下步骤配置：\n\n"
+            "1. 打开 [open.bigmodel.cn](https://open.bigmodel.cn)，手机号免费注册\n"
+            "2. 控制台右上角「API Keys」→ 创建并复制 Key\n"
+            "3. Streamlit Cloud → 本应用 → Settings → Secrets，添加一行：\n"
+            "   `AI_API_KEY = \"你的Key\"`，然后 Reboot\n\n"
+            "使用的是智谱免费模型 glm-4-flash，**不会产生任何费用**。\n\n"
+            "普通人测试也可以直接在上面输入框里临时粘贴 Key 使用。"
+        )
+        st.stop()
+
+    # ---- 构建成绩数据上下文(如果刚算过 GPA) ----
+    gpa_context = None
+    if "calc_result" in st.session_state:
+        res = st.session_state["calc_result"]
+        rdf = res["df"]
+        courses_text = "\n".join(
+            f"{r['学期']} | {r['课程名']} | {r['学分']:g} | {r['成绩']:g} | {r['绩点']:g}"
+            for _, r in rdf.iterrows()
+        )
+        gpa_context = {
+            "rule_name": res["ruleset"].name,
+            "scale": res["ruleset"].scale,
+            "gpa": f"{res['gpa']:.3f}",
+            "avg": f"{res['avg']:.2f}",
+            "courses_text": courses_text,
+        }
+        st.success(f"✅ 已加载你的成绩数据（GPA {gpa_context['gpa']}，共 {len(rdf)} 门课），AI 回答将基于这些数据")
+    else:
+        st.info("💡 你还没有计算 GPA。先去「🏠 计算GPA」页面输入成绩再回来，AI 就能看到你的具体数据。")
+
+    # ---- 聊天界面 ----
+    if "chat_messages" not in st.session_state:
+        st.session_state["chat_messages"] = []
+
+    # 渲染历史对话
+    for msg in st.session_state["chat_messages"]:
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
+
+    user_input = st.chat_input("输入你的问题，例如：怎么把GPA提到3.8？")
+
+    if user_input:
+        # 追加用户消息
+        st.session_state["chat_messages"].append({"role": "user", "content": user_input})
+        with st.chat_message("user"):
+            st.markdown(user_input)
+
+        # 调用 AI(系统提示词 + 历史对话,历史过长时只保留最近 20 条)
+        with st.chat_message("assistant"):
+            with st.spinner("思考中..."):
+                try:
+                    messages = (
+                        [{"role": "system", "content": build_system_prompt(gpa_context)}]
+                        + st.session_state["chat_messages"][-20:]
+                    )
+                    reply = chat_completion(messages, api_key)
+                    st.markdown(reply)
+                    st.session_state["chat_messages"].append(
+                        {"role": "assistant", "content": reply}
+                    )
+                except Exception as e:
+                    st.error(f"AI 调用失败：{e}\n\n请稍后重试；如果反复出现，请检查 API Key 是否有效。")
+
+    # 清空对话按钮
+    if st.session_state["chat_messages"]:
+        if st.button("🗑️ 清空对话"):
+            st.session_state["chat_messages"] = []
+            st.rerun()
+
+
+# ============================================================
+# 页面 3: 管理面板 (你用的,查看所有提交数据)
 # ============================================================
 if page == "📊 管理面板":
 

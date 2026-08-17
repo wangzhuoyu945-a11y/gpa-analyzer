@@ -13,6 +13,7 @@
 - 🥧 学分分布饼图、🕸️ 成绩雷达图
 - 🖥️ 终端美化输出(表格、颜色标注)
 - 🌐 **Web 在线版**:浏览器打开即用,无需安装,支持手动输入课程,数据自动保存
+- 🤖 **AI 绩点助手**:内置智能问答,基于你的真实成绩回答"怎么把GPA提到3.8"这类规划问题
 
 ## 🚀 快速开始
 
@@ -120,12 +121,32 @@ python main.py --school 标准5.0制
 
 > ⚠️ 内置预设是常见规则的整理,**具体分档请以你学校教务处公布的规定为准**,发现不一致欢迎提 PR 补充更多学校。
 
+## 🤖 AI 绩点助手
+
+Web 在线版的第三个页面,一个懂你成绩的聊天助手:
+
+- 先在「计算GPA」页面算出结果,再打开「AI助手」,你的 GPA、课程明细会自动成为 AI 的回答依据
+- 可以问:"哪门课拖了我的GPA"、"大二要考多少分才能把GPA刷到3.8"、"什么叫加权平均分"
+- 使用智谱 AI 免费模型 **glm-4-flash**,不产生任何费用
+
+### 配置方法(部署者)
+
+1. 在 [open.bigmodel.cn](https://open.bigmodel.cn) 免费注册,创建一个 API Key
+2. 在 Streamlit Cloud 的 App Settings → Secrets 里添加:
+
+   ```toml
+   AI_API_KEY = "你的Key"
+   ```
+
+3. Reboot 应用即可。本地运行则在项目根目录创建 `.streamlit/secrets.toml` 写入同样内容(已被 .gitignore 排除,不会上传)
+
 ## 📂 项目结构
 
 ```
 gpa-analyzer/
 ├── app.py             # Streamlit Web 应用(在线版入口)
 ├── main.py            # 命令行版入口
+├── ai_assistant.py    # AI 问答助手(智谱 glm-4-flash,OpenAI 兼容接口)
 ├── db.py              # 数据存储层(SQLite,保存测试数据)
 ├── gpa.py             # GPA 计算引擎(加权平均、绩点换算)
 ├── rules_loader.py    # 学校绩点规则加载器(读 JSON 配置)
