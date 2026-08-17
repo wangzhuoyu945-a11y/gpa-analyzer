@@ -78,6 +78,28 @@ if page == "🏠 计算GPA":
         )
 
     with col2:
+        # 根据选择展示规则说明
+        if selected_idx == 0:
+            st.info("📖 **内置默认 · 标准4.0制（细分）**\n\n"
+                    "多数高校采用的绩点规则：\n"
+                    "- 满绩 **4.0**（90分及以上）\n"
+                    "- 每 **3分** 划为一档（如 90→4.0, 87→3.7, 83→3.3）\n"
+                    "- 60分以下绩点为 0\n\n"
+                    "**分数对照**：90→4.0 | 87→3.7 | 83→3.3 | 80→3.0 | 77→2.7 | 73→2.3 | 70→2.0 | 60→1.0")
+        else:
+            rs_preview = find_school(school_names[selected_idx])
+            if rs_preview:
+                desc = rs_preview.description or "暂无说明"
+                rule_lines = []
+                for threshold, point in rs_preview.rules:
+                    rule_lines.append(f"{threshold}→{point:g}")
+                rule_table = " | ".join(rule_lines)
+                st.info(f"📖 **{rs_preview.name}**（满绩 {rs_preview.scale:g}）\n\n"
+                        f"{desc}\n\n"
+                        f"**分数对照**：{rule_table}")
+            else:
+                st.warning("未找到该规则的说明")
+
         st.info("💡 **使用提示**\n\n"
                 "1. 选择你学校的绩点规则\n"
                 "2. 上传成绩单 CSV 或手动输入\n"
